@@ -1,0 +1,300 @@
+#!/usr/bin/env python3
+
+# Copyright (c) 2023 Florian Paul Azim Hoberg @gyptazy <gyptazy@gyptazy.ch>
+# All rights reserved
+#
+# This software is a derivative of the original makesite.py.
+# The license text of the original makesite.py is included below.
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2022 Sunaina Pai
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+import argparse
+import configparser
+import datetime
+import glob
+import json
+import os
+import re
+import sys
+import shutil
+import sys
+
+
+def parse_arguments():
+    """ Parse arguments by cli input """
+    args_parser = argparse.ArgumentParser(description='manpageblog', usage='%(prog)s')
+    args_parser.add_argument('-c', '--config', default='blog.conf', type=str, help='Path to manpageblog config file.', required=False)
+    return args_parser.parse_args()
+
+
+def parse_config(config_file):
+    """ Parse config file for manpageblog """
+    try:
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        return config
+    except configparser.ParsingError:
+        log('Error parsing config file: Impossible to parse file.')
+        sys.exit(2)
+    except KeyError:
+        log('Error parsing config file: Key/Value not found.')
+        sys.exit(2)
+
+
+def validate(config):
+    """ Validate config file for mandatory options """
+    log_error = False
+
+    if len(config['general']['name']) == 0:
+        log('Error: Mandatory field "name" missing.')
+        log_error = True
+
+    if len(config['general']['description']) == 0:
+        log('Error: Mandatory field "description" missing.')
+        log_error = True
+
+    if len(config['general']['subtitle']) == 0:
+        log('Error: Mandatory field "subtitle" missing.')
+        log_error = True
+
+    if len(config['processing']['site_url']) == 0:
+        log('Error: Mandatory field "site_url" missing.')
+        log_error = True
+
+    if len(config['processing']['assets']) == 0:
+        log('Error: Mandatory field "assets" missing.')
+        log_error = True
+
+    if len(config['processing']['template_path']) == 0:
+        log('Error: Mandatory field "template_path" missing.')
+        log_error = True
+
+    if len(config['processing']['output_path']) == 0:
+        log('Error: Mandatory field "output_path" missing.')
+        log_error = True
+
+    if log_error:
+        sys.exit(1)
+
+
+def fread(file_name):
+    """ Read file and close the file """
+    with open(file_name, 'r') as f:
+        return f.read()
+
+
+def fwrite(file_name, text):
+    """ Write content to file and close the file """
+    basedir = os.path.dirname(file_name)
+    if not os.path.isdir(basedir):
+        os.makedirs(basedir)
+
+    with open(file_name, 'w') as f:
+        f.write(text)
+
+
+def log(msg, *args):
+    """ Log message with specified arguments """
+    sys.stderr.write(msg.format(*args) + '\n')
+
+
+def truncate(text, words):
+    """ Remove tags and truncate text to the specified number of words """
+    return ' '.join(re.sub('(?s)<.*?>', ' ', text).split()[:words])
+
+
+def read_headers(text):
+    """ Parse headers in text and yield (key, value, end-index) tuples """
+    for match in re.finditer(r'\s*<!--\s*(.+?)\s*:\s*(.+?)\s*-->\s*|.+', text):
+        if not match.group(1):
+            break
+        yield match.group(1), match.group(2), match.end()
+
+
+def rfc_2822_format(date_str):
+    """ Convert yyyy-mm-dd date string to RFC 2822 format date string """
+    d = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+    return d.strftime('%a, %d %b %Y %H:%M:%S +0000')
+
+
+def read_content(filename):
+    """ Read content and metadata from file into a dictionary """
+    text = fread(filename)
+
+    # Read metadata and save it in a dictionary.
+    date_slug = os.path.basename(filename).split('.')[0]
+    match = re.search(r'^(?:(\d\d\d\d-\d\d-\d\d)-)?(.+)$', date_slug)
+    content = {
+        'date': match.group(1) or '1970-01-01',
+        'slug': match.group(2),
+    }
+
+    # Read headers.
+    end = 0
+    for key, val, end in read_headers(text):
+        content[key] = val
+
+    # Separate content from headers.
+    text = text[end:]
+
+    # Convert Markdown content to HTML.
+    if filename.endswith(('.md', '.mkd', '.mkdn', '.mdown', '.markdown')):
+        try:
+            from markdown_it import MarkdownIt
+            md = MarkdownIt()
+            text = md.render(text)
+        except ImportError as error:
+            log('WARNING: Cannot render Markdown in {}: {}', filename, str(error))
+
+    # Update the dictionary with content and RFC 2822 date.
+    content.update({
+        'content': text,
+        'rfc_2822_date': rfc_2822_format(content['date'])
+    })
+
+    return content
+
+
+def render(template, **params):
+    """ Replace placeholders in template with values from params """
+    return re.sub(r'{{\s*([^}\s]+)\s*}}',
+                  lambda match: str(params.get(match.group(1), match.group(0))),
+                  template)
+
+
+def make_pages(src, dst, layout, **params):
+    """ Generate pages from page content """
+    items = []
+
+    for src_path in glob.glob(src):
+        content = read_content(src_path)
+
+        page_params = dict(params, **content)
+
+        # Populate placeholders in content if content-rendering is enabled.
+        if page_params.get('render') == 'yes':
+            rendered_content = render(page_params['content'], **page_params)
+            page_params['content'] = rendered_content
+            content['content'] = rendered_content
+
+        items.append(content)
+
+        dst_path = render(dst, **page_params)
+        output = render(layout, **page_params)
+
+        log('Rendering {} => {} ...', src_path, dst_path)
+        fwrite(dst_path, output)
+
+    return sorted(items, key=lambda x: x['date'], reverse=True)
+
+
+def make_list(config, posts, dst, list_layout, item_layout, **params):
+    """ Generate list page for a blog """
+    items = []
+
+    for post in posts:
+        item_params = dict(params, **post)
+        item_params['summary'] = truncate(post['content'], int(config['general'].get('preview_words', 150)))
+        item = render(item_layout, **item_params)
+        items.append(item)
+
+    params['content'] = ''.join(items)
+    dst_path = render(dst, **params)
+    output = render(list_layout, **params)
+
+    log('Rendering list => {} ...', dst_path)
+    fwrite(dst_path, output)
+
+
+def main():
+    """ Run manpageblog """
+    arguments = parse_arguments()
+    config = parse_config(arguments.config)
+    validate(config)
+
+    # Create a new directory from scratch
+    # WARNING: If enabled this will remove the whole directory including all files!
+    # Since parsing a string from ini would always result in true we make an explicit
+    # check for the word 'force'
+    if config['processing']['output_from_scratch'] == 'force':
+        if os.path.isdir(config['processing']['output_path']):
+            shutil.rmtree(config['processing']['output_path'])
+    shutil.copytree(config['processing']['assets'], f"{config['processing']['output_path']}/assets")
+
+    # Remap vars from config
+    params = {
+        '_version': '1.1',
+        'name': config['general']['name'],
+        'description': config['general']['description'],
+        'keywords': config['general'].get('keywords', 'unknown'),
+        'keywords_show': config['general'].get('keywords_show', 'meta'),
+        'robots': config['general'].get('robots', 'noindex,nofollow'),
+        'subtitle': config['general']['subtitle'],
+        'author': config['general'].get('author', 'unknown'),
+        'copyright': config['general'].get('copyright', 'manpageblog'),
+        'logo_site': config['general'].get('logo_site', ''),
+        'logo_favicon': config['general'].get('logo_favicon', ''),
+        'logo_apple_touch': config['general'].get('logo_apple_touch', ''),
+        'profile_mastodon': config['social'].get('mastodon', 'unknown'),
+        'profile_twitter': config['social'].get('twitter', 'unknown'),
+        'image_width': config['opengraph'].get('image_width', '800'),
+        'image_height': config['opengraph'].get('image_hight', '375'),
+        'profile_github': config['social'].get('github', 'unknown'),
+        'site_url': config['processing']['site_url'],
+        'base_path': config['processing']['base_path'],
+        'theme': config['processing'].get('theme', 'light'),
+        'current_year': datetime.datetime.now().year
+    }
+
+    # Load layouts
+    if params.get('keywords_show') != 'meta':
+        page_layout = fread(f'{config["processing"]["template_path"]}/page_tags.html')
+    else:
+        page_layout = fread(f'{config["processing"]["template_path"]}/page.html')
+    post_layout = fread(f'{config["processing"]["template_path"]}/post.html')
+    list_layout = fread(f'{config["processing"]["template_path"]}/list.html')
+    item_layout = fread(f'{config["processing"]["template_path"]}/item.html')
+    feed_xml = fread(f'{config["processing"]["template_path"]}/feed.xml')
+    item_xml = fread(f'{config["processing"]["template_path"]}/item.xml')
+
+    # Combine layouts to form final layouts
+    post_layout = render(page_layout, content=post_layout)
+    list_layout = render(page_layout, content=list_layout)
+
+    # Create site pages
+    make_pages('content/_index.html', config['processing']['output_path']+'/index.html', page_layout, **params)
+    make_pages('content/[!_]*.html', config['processing']['output_path']+'/{{ slug }}/index.html', page_layout, **params)
+
+    # Create blogs
+    blog_posts = make_pages('content/posts/*.md',   config['processing']['output_path']+'/posts/{{ slug }}/index.html', post_layout, blog='posts', **params)
+
+    # Create blog list pages
+    make_list(config, blog_posts, config['processing']['output_path']+'/posts/index.html', list_layout, item_layout, blog='posts', title='Posts', **params)
+
+    # Create RSS feeds
+    make_list(config, blog_posts, config['processing']['output_path']+'/posts/rss.xml', feed_xml, item_xml, blog='posts', title='Posts', **params)
+
+
+if __name__ == '__main__':
+    main()
