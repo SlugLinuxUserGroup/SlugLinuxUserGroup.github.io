@@ -24,7 +24,7 @@ jobs:
         run: |
           make
           cp -r out/* .
-          rm -rf out content Makefile
+          rm -rf out content Makefile .github
           
       - name: Deploy to gh-pages
         run: |
