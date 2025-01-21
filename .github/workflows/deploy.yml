@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,13 +24,13 @@ jobs:
         run: |
           make
           cp -r out/* .
-          rm -rf out content
+          rm -rf out content Makefile
           
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: Build site
-          title: Build site
-          body: Automated build from content directory
-          branch: build
-          delete-branch: true
+      - name: Deploy to gh-pages
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout --orphan gh-pages
+          git add -A
+          git commit -m "Build site"
+          git push -f origin gh-pages
