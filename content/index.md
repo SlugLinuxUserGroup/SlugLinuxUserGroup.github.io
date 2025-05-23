@@ -11,6 +11,8 @@ version: v1.0.0
 
 Welcome to SLUG, the Slug Linux User Group at the University of California, Santa Cruz. We are a group of students who are passionate about Linux and open-source software. Join our [Discord community](https://discord.gg/XbscWTcv2H) to connect with other members!
 
+This group is open to all students consistent with state and federal law, the UC Nondiscrimination Statement and the Nondiscrimination Policy Statement for University of California Publications Regarding Student-Related Matters.
+
 Officer Team ('24-25 AY):
 
 * Julian Barbera (jbarbera at ucsc.edu) - President
