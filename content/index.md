@@ -1,7 +1,7 @@
 ---
 title: Slug Linux User Group
 subtitle: The Linux User Group at UC Santa Cruz
-date: 2025-01-17
+date: 2025-09-25
 lang: en
 toc-title: Contents
 version: v1.0.0
