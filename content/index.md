@@ -13,11 +13,12 @@ Welcome to SLUG, the Slug Linux User Group at the University of California, Sant
 
 This group is open to all students consistent with state and federal law, the UC Nondiscrimination Statement and the Nondiscrimination Policy Statement for University of California Publications Regarding Student-Related Matters.
 
-Officer Team ('24-25 AY):
+Officer Team ('25-26 AY):
 
-* Julian Barbera (jbarbera at ucsc.edu) - President
-* Iakov Tarenenko (ext at ucsc.edu) - Vice President
-* Natalie Marks (ndmarks at ucsc.edu) - Operations
+* Peter Dobbins (pdobbins at ucsc.edu) - President
+* Emma Chernomorsky (mchernom at ucsc.edu) - Vice President
+* Julian Barbera (jbarbera at ucsc.edu) - Founder
+* Iakov Tarenenko (ext at ucsc.edu) - Operations (Janitor)
 * Nancy Lau (najilau at ucsc.edu) - Outreach
 
 ## Meetings
