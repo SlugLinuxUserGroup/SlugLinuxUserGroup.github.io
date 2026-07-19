@@ -1,7 +1,7 @@
 ---
 title: Slug Linux User Group
 subtitle: The Linux User Group at UC Santa Cruz
-date: 2025-09-25
+date: 2026-07-04
 lang: en
 toc-title: Contents
 version: v1.0.0
@@ -9,23 +9,38 @@ version: v1.0.0
 
 ## Introduction
 
-Welcome to SLUG, the Slug Linux User Group at the University of California,
-Santa Cruz. We are a group of students who are passionate about Linux and
-open-source software. Join our
-[Discord community](https://discord.gg/XbscWTcv2H) to connect with other
-members!
+Welcome to SLUG, the Slug Linux User Group at the University of California, Santa Cruz. We are a group of students who are passionate about Linux and open-source software. Join our [Discord community](https://discord.gg/XbscWTcv2H) to connect with other members!
 
-This group is open to all students consistent with state and federal law, the UC
-Nondiscrimination Statement and the Nondiscrimination Policy Statement for
-University of California Publications Regarding Student-Related Matters.
+This group is open to all students consistent with state and federal law, the UC Nondiscrimination Statement and the Nondiscrimination Policy Statement for University of California Publications Regarding Student-Related Matters.
+
+Officer Team ('26-27 AY):
+
+- Mateo White - President
+- Morris Richman - Officer
+- Alex Coble - Administrator
+- Ollie Wendt - Officer
+- Peter Dobbins - Graduate Advisor
+- Iakov Tarenenko - Graduate Advisor
+- Nancy Lau - Graduate Advisor
+
+<details>
+<summary>Past Officer Teams</summary>
 
 Officer Team ('25-26 AY):
 
-- Peter Dobbins (pdobbins at ucsc.edu) - President
-- Emma Chernomorsky (mchernom at ucsc.edu) - Vice President
-- Julia Barbera (jbarbera at ucsc.edu) - Founder
-- Iakov Tarenenko (ext at ucsc.edu) - Operations (Janitor)
-- Nancy Lau (najilau at ucsc.edu) - Outreach
+- Peter Dobbins - President
+- Emma Chernomorsky - Vice President
+- Iakov Tarenenko - Operations
+- Nancy Lau - Graduate Advisor
+
+Officer Team ('24-25 AY):
+
+- Julia Barbera - President
+- Iakov Tarenenko - Vice President
+- Natalie Marks - Operations
+- Nancy Lau - Graduate Advisor
+
+</details>
 
 ## Meetings
 
