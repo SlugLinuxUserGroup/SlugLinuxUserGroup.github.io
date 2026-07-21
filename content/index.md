@@ -1,7 +1,7 @@
 ---
 title: Slug Linux User Group
 subtitle: The Linux User Group at UC Santa Cruz
-date: 2026-07-04
+date: 2026-07-21
 lang: en
 toc-title: Contents
 version: v1.0.0
@@ -20,7 +20,7 @@ Officer Team ('26-27 AY):
 - Alex Coble - Administrator
 - Ollie Wendt - Officer
 - Peter Dobbins - Graduate Advisor
-- Iakov Tarenenko - Graduate Advisor
+- Iakov Taranenko - Graduate Advisor
 - Nancy Lau - Graduate Advisor
 
 <details>
@@ -30,13 +30,13 @@ Officer Team ('25-26 AY):
 
 - Peter Dobbins - President
 - Emma Chernomorsky - Vice President
-- Iakov Tarenenko - Operations
+- Iakov Taranenko - Operations
 - Nancy Lau - Graduate Advisor
 
 Officer Team ('24-25 AY):
 
 - Julia Barbera - President
-- Iakov Tarenenko - Vice President
+- Iakov Taranenko - Vice President
 - Natalie Marks - Operations
 - Nancy Lau - Graduate Advisor
 
